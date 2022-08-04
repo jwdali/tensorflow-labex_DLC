@@ -3,8 +3,8 @@ import tensorflow as tf
 import numpy as np
 import re
 import os
+#model_dir='/root/test/'
 model_dir='./'
-image='/root/data/cat.jpg'
 #将类别ID转换为人类易读的标签
 class NodeLookup(object):
   def __init__(self,
@@ -59,23 +59,34 @@ def create_graph():
     graph_def = tf.compat.v1.GraphDef()
     graph_def.ParseFromString(f.read())
     tf.import_graph_def(graph_def, name='')
-#读取图片
-image_data = tf.io.gfile.GFile(image, 'rb').read()
-#创建graph
-create_graph()
-sess=tf.compat.v1.Session()
-#Inception-v3模型的最后一层softmax的输出
-softmax_tensor= sess.graph.get_tensor_by_name('softmax:0')
-#输入图像数据，得到softmax概率值（一个shape=(1,1008)的向量）
-predictions = sess.run(softmax_tensor,{'DecodeJpeg/contents:0': image_data})
-#(1,1008)->(1008,)
-predictions = np.squeeze(predictions)
-# ID --> English string label.
-node_lookup = NodeLookup()
-#取出前5个概率最大的值（top-5)
-top_5 = predictions.argsort()[-5:][::-1]
-for node_id in top_5:
-  human_string = node_lookup.id_to_string(node_id)
-  score = predictions[node_id]
-  print('%s (score = %.5f)' % (human_string, score))
-sess.close()
+
+def classify_graph(imageFile):
+  #读取图片
+  image_data = tf.io.gfile.GFile(imageFile, 'rb').read()
+  #创建graph
+  create_graph()
+  sess=tf.compat.v1.Session()
+  #Inception-v3模型的最后一层softmax的输出
+  softmax_tensor= sess.graph.get_tensor_by_name('softmax:0')
+  #输入图像数据，得到softmax概率值（一个shape=(1,1008)的向量）
+  predictions = sess.run(softmax_tensor,{'DecodeJpeg/contents:0': image_data})
+  #(1,1008)->(1008,)
+  predictions = np.squeeze(predictions)
+  # ID --> English string label.
+  node_lookup = NodeLookup()
+  #取出前5个概率最大的值（top-5)
+  top_5 = predictions.argsort()[-5:][::-1]
+  for node_id in top_5:
+    human_string = node_lookup.id_to_string(node_id)
+    score = predictions[node_id]
+    print('%s (score = %.5f)' % (human_string, score))
+  sess.close()
+
+if __name__ == "__main__":
+  imageDir = "/root/data/images"
+  for root, dirs, files in os.walk(imageDir):
+    for f in files:
+      print(os.path.join(root, f))
+      classify_graph(os.path.join(root, f))
+      print("\n")
+    
