@@ -3,10 +3,8 @@ import tensorflow as tf
 import numpy as np
 import re
 import os
-#model_dir='/root/test/'
 model_dir='./'
-#image='/root/test/cat.jpg'
-image='data/cat3.jpg'
+image='/root/data/cat.jpg'
 #将类别ID转换为人类易读的标签
 class NodeLookup(object):
   def __init__(self,
