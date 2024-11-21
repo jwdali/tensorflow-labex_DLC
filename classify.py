@@ -83,7 +83,7 @@ def classify_graph(imageFile):
   sess.close()
 
 if __name__ == "__main__":
-  imageDir = "/images"
+  imageDir = "/root/data/images"
   for root, dirs, files in os.walk(imageDir):
     for f in files:
       print(os.path.join(root, f))
